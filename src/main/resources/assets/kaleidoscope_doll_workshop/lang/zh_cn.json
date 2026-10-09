@@ -1,0 +1,12 @@
+{
+  "modmenu.nameTranslation.kaleidoscope_doll_workshop": "森罗物语：玩偶工坊",
+  "modmenu.descriptionTranslation.kaleidoscope_doll_workshop": "“森罗物语：玩偶”的扩展模组，添加了更多玩偶。",
+  "itemGroup.kaleidoscope_doll_workshop.group": "森罗物语：玩偶工坊",
+  "item.kaleidoscope_doll_workshop.player_doll": "玩家玩偶",
+  "item.kaleidoscope_doll_workshop.player_doll.owner": "%s的玩偶",
+  "block.kaleidoscope_doll_workshop.computer": "工坊电脑",
+  "gui.kaleidoscope_doll_workshop.computer.search": "玩家名称…",
+  "tooltip.kaleidoscope_doll_workshop.computer.input": "放入羊毛进行转化",
+  "tooltip.kaleidoscope_doll_workshop.computer": "右击使用电脑，将羊毛转化为玩家玩偶",
+  "subtitle.kaleidoscope_doll_workshop.block.duck_toy": "声音：鸭子玩具"
+}

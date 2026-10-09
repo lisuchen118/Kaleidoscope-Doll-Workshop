@@ -1,0 +1,33 @@
+{
+	"schemaVersion": 1,
+	"id": "kaleidoscope_doll_workshop",
+	"version": "${version}",
+	"name": "Kaleidoscope Doll Workshop",
+	"description": "An add-on for \"Kaleidoscope Doll\" that adds more dolls.",
+	"authors": [
+		"Li Suchen"
+	],
+	"contributors": [
+		"ysbb"
+	],
+	"contact": {},
+	"license": "GPL-3.0-only",
+	"icon": "assets/kaleidoscope_doll_workshop/textures/item/workshop_icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"lsc.kaleidoscopeDollWorkshop.KaleidoscopeDollWorkshop"
+		],
+		"client": [
+			"lsc.kaleidoscopeDollWorkshop.KaleidoscopeDollWorkshopClient"
+		]
+	},
+	"mixins": [],
+	"depends": {
+		"fabricloader": ">=0.14.21",
+		"minecraft": "1.20.1",
+		"java": ">=17",
+		"fabric-api": "*",
+		"geckolib": ">=4.7"
+	}
+}
