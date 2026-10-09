@@ -1,0 +1,12 @@
+{
+  "modmenu.nameTranslation.kaleidoscope_doll_workshop": "Kaleidoscope Doll Workshop",
+  "modmenu.descriptionTranslation.kaleidoscope_doll_workshop": "An add-on for 'Kaleidoscope Doll' that adds more dolls.",
+  "itemGroup.kaleidoscope_doll_workshop.group": "Kaleidoscope Doll Workshop",
+  "item.kaleidoscope_doll_workshop.player_doll": "Player Doll",
+  "item.kaleidoscope_doll_workshop.player_doll.owner": "%s's Doll",
+  "block.kaleidoscope_doll_workshop.computer": "Workshop Computer",
+  "gui.kaleidoscope_doll_workshop.computer.search": "Username...",
+  "tooltip.kaleidoscope_doll_workshop.computer.input": "Put in wool for crafting",
+  "tooltip.kaleidoscope_doll_workshop.computer": "Right-click to use the computer to transform the wool into the player doll",
+  "subtitle.kaleidoscope_doll_workshop.block.duck_toy": "Duck Toy Sound"
+}
