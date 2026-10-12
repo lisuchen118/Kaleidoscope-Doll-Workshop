@@ -15,6 +15,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Set;
@@ -41,8 +43,14 @@ public final class SkinTextureCache {
     /** 皮肤 URL → 已注册的纹理标识符。 */
     private static final Map<String, ResourceLocation> TEXTURES = new ConcurrentHashMap<>();
 
-    /** 档案 → 皮肤数据，避免每帧重复解码 base64 与解析 JSON。 */
-    private static final Map<GameProfile, SkinData> PARSED = new ConcurrentHashMap<>();
+    /**
+     * 档案指纹 → 皮肤数据，避免每帧重复解码 base64 与解析 JSON。
+     *
+     * <p>键必须用 {@code profile.toString()} 而不是 {@link GameProfile} 本身：
+     * authlib 的 {@code GameProfile.equals/hashCode} 只比较 id 与 name，**忽略 properties**，
+     * 直接拿它当键会导致玩家换皮肤后仍然命中旧缓存，永久显示旧皮肤。
+     */
+    private static final Map<String, SkinData> PARSED = new ConcurrentHashMap<>();
 
     /** 正在下载中的 URL，避免每帧重复发起请求。 */
     private static final Set<String> PENDING = ConcurrentHashMap.newKeySet();
@@ -80,13 +88,14 @@ public final class SkinTextureCache {
         if (profile == null) {
             return null;
         }
-        SkinData cached = PARSED.get(profile);
+        String fingerprint = profile.toString();
+        SkinData cached = PARSED.get(fingerprint);
         if (cached != null) {
             return cached == SkinData.EMPTY ? null : cached;
         }
 
         SkinData parsed = readSkinData(profile);
-        PARSED.put(profile, parsed == null ? SkinData.EMPTY : parsed);
+        PARSED.put(fingerprint, parsed == null ? SkinData.EMPTY : parsed);
         return parsed;
     }
 
@@ -108,11 +117,15 @@ public final class SkinTextureCache {
                 }
 
                 ResourceLocation id = skinLocation(url);
-                // 纹理上传必须在渲染线程执行
+                // 纹理上传必须在渲染线程执行；无论注册成功与否都要解除「下载中」标记
                 Minecraft.getInstance().execute(() -> {
-                    Minecraft.getInstance().getTextureManager()
-                            .register(id, new DynamicTexture(image));
-                    TEXTURES.put(url, id);
+                    try {
+                        Minecraft.getInstance().getTextureManager()
+                                .register(id, new DynamicTexture(image));
+                        TEXTURES.put(url, id);
+                    } finally {
+                        PENDING.remove(url);
+                    }
                 });
             } catch (Exception e) {
                 // 下载失败就静默放弃，等待下次渲染时重试
@@ -125,8 +138,27 @@ public final class SkinTextureCache {
 
     @SuppressWarnings("removal")
     private static ResourceLocation skinLocation(String url) {
-        return new ResourceLocation(KaleidoscopeDollWorkshop.MOD_ID,
-                "doll_skin/" + Integer.toHexString(url.hashCode()));
+        return new ResourceLocation(KaleidoscopeDollWorkshop.MOD_ID, "doll_skin/" + digest(url));
+    }
+
+    /**
+     * 用 SHA-1 前 16 位作为纹理 ID 的后缀。
+     *
+     * <p>不用 {@code String.hashCode()}：它只有 32 位，皮肤一多就可能碰撞，
+     * 而碰撞的两个 URL 会共用同一个已注册纹理（注册对已存在的 ID 不会覆盖），
+     * 表现为「不同玩偶显示同一张皮」。
+     */
+    private static String digest(String url) {
+        try {
+            byte[] hash = MessageDigest.getInstance("SHA-1").digest(url.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(16);
+            for (int i = 0; i < 8; i++) {
+                sb.append(String.format("%02x", hash[i]));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            return Integer.toHexString(url.hashCode()); // 理论上不会发生
+        }
     }
 
     /** 从 base64 的 textures 属性里解出皮肤 URL 与模型类型。 */
